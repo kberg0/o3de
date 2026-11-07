@@ -725,7 +725,9 @@ namespace AzToolsFramework
 
         PrefabOperationResult PrefabPublicHandler::SavePrefab(AZ::IO::Path filePath)
         {
-            auto templateId = m_prefabSystemComponentInterface->GetTemplateIdFromFilePath(filePath.c_str());
+            const AZ::IO::Path templatePath = filePath.IsAbsolute()
+                ? m_prefabLoaderInterface->GenerateRelativePath(filePath) : filePath;
+            auto templateId = m_prefabSystemComponentInterface->GetTemplateIdFromFilePath(templatePath.c_str());
 
             if (templateId == InvalidTemplateId)
             {
@@ -733,7 +735,10 @@ namespace AzToolsFramework
                     AZStd::string("SavePrefab - Path error. Path could be invalid, or the prefab may not be loaded in this level."));
             }
 
-            if (!m_prefabLoaderInterface->SaveTemplate(templateId))
+            const bool saved = filePath.IsAbsolute()
+                ? m_prefabLoaderInterface->SaveTemplateToFile(templateId, filePath)
+                : m_prefabLoaderInterface->SaveTemplate(templateId);
+            if (!saved)
             {
                 return AZ::Failure(AZStd::string("Could not save prefab - internal error (Json write operation failure)."));
             }
@@ -1226,6 +1231,10 @@ namespace AzToolsFramework
 
         PrefabRequestResult PrefabPublicHandler::HasUnsavedChanges(AZ::IO::Path prefabFilePath) const
         {
+            if (prefabFilePath.IsAbsolute())
+            {
+                prefabFilePath = m_prefabLoaderInterface->GenerateRelativePath(prefabFilePath);
+            }
             auto templateId = m_prefabSystemComponentInterface->GetTemplateIdFromFilePath(prefabFilePath.c_str());
 
             if (templateId == InvalidTemplateId)

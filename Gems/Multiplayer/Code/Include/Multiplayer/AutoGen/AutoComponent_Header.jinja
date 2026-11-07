@@ -552,6 +552,20 @@ namespace {{ Component.attrib['Namespace'] }}
 
         static AZStd::unique_ptr<Multiplayer::IMultiplayerComponentInput> AllocateComponentInput();
 
+{% if Component.attrib.get('GenerateInitializationHelpers', 'false')|booleanTrue %}
+{% for Property in Component.iter('NetworkProperty') %}
+{% if Property.attrib['Container'] == 'Vector' and not Property.attrib['IsRewindable']|booleanTrue %}
+        //! Seeds prefab/schema defaults before network attachment; normal writes use the controller.
+        bool Initialize{{ UpperFirst(Property.attrib['Name']) }}(const AZStd::fixed_vector<{{ Property.attrib['Type'] }}, {{ Property.attrib['Count'] }}>& values)
+        {
+            if (m_netBindComponent) { return false; }
+            m_{{ LowerFirst(Property.attrib['Name']) }} = values;
+            return true;
+        }
+{% endif %}
+{% endfor %}
+{% endif %}
+
         {{ ComponentBaseName }}();
         ~{{ ComponentBaseName }}() override;
 

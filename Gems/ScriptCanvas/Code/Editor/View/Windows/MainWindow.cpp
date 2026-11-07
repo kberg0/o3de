@@ -10,6 +10,7 @@
 #include <IConsole.h>
 
 #include <Editor/View/Windows/MainWindow.h>
+#include <ScriptCanvas/Bus/GraphAutomationRequestBus.h>
 #include <Editor/GraphCanvas/AutomationIds.h>
 #include <Editor/GraphCanvas/GraphCanvasEditorNotificationBusId.h>
 
@@ -1804,10 +1805,12 @@ namespace ScriptCanvasEditor
 
     void MainWindow::OnSaveCallBack(const VersionExplorer::FileSaveResult& result)
     {
-        auto memoryAsset = OnSaveComplete(m_fileSaver->GetSource(), result);
+        const bool automation = m_automationSave;
+        // Interactive failures retain their dialog. Automation returns the native error to its active request.
+        auto memoryAsset = automation && !result.IsSuccess()
+            ? m_fileSaver->GetSource() : OnSaveComplete(m_fileSaver->GetSource(), result);
 
-        const bool displayAsNotification = true;
-        RunGraphValidation(displayAsNotification);
+        RunGraphValidation(!automation);
 
         m_closeCurrentGraphAfterSave = false;
 
@@ -1816,6 +1819,17 @@ namespace ScriptCanvasEditor
         UpdateSaveState(true);
         UnblockCloseRequests();
         m_fileSaver.reset();
+        m_automationSave = false;
+        if (automation)
+        {
+            AZStd::string error = result.fileSaveError;
+            if (!result.tempFileRemovalError.empty())
+            {
+                error += " Temporary file cleanup: " + result.tempFileRemovalError;
+            }
+            GraphAutomationNotificationBus::Broadcast(&GraphAutomationNotifications::OnAutomationSaveComplete,
+                result.absolutePath.Native(), error);
+        }
     }
 
     SourceHandle MainWindow::OnSaveComplete(const SourceHandle& sourceHandle, const VersionExplorer::FileSaveResult& result)
@@ -2091,7 +2105,8 @@ namespace ScriptCanvasEditor
         AZStd::string copyMimeType;
         GraphCanvas::SceneRequestBus::EventResult(copyMimeType, GetActiveGraphCanvasGraphId(), &GraphCanvas::SceneRequests::GetCopyMimeType);
 
-        const bool pasteableClipboard = (!copyMimeType.empty() && QApplication::clipboard()->mimeData()->hasFormat(copyMimeType.c_str()))
+        const auto* mimeData = QApplication::clipboard()->mimeData();
+        const bool pasteableClipboard = (!copyMimeType.empty() && mimeData && mimeData->hasFormat(copyMimeType.c_str()))
                                         || !GraphVariablesTableView::HasCopyVariableData();
 
         ui->action_Paste->setEnabled(pasteableClipboard);

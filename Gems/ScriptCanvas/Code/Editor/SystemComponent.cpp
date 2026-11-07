@@ -28,6 +28,8 @@
 #include <Editor/Framework/ScriptCanvasGraphUtilities.h>
 #include <Editor/Settings.h>
 #include <Editor/SystemComponent.h>
+#include <Editor/GraphAutomation.h>
+#include <AzCore/Component/ComponentApplicationBus.h>
 #include <Editor/View/Dialogs/SettingsDialog.h>
 #include <Editor/View/Widgets/SourceHandlePropertyAssetCtrl.h>
 #include <Editor/View/Windows/MainWindow.h>
@@ -78,6 +80,7 @@ namespace ScriptCanvasEditor
 
     void SystemComponent::Reflect(AZ::ReflectContext* context)
     {
+        GraphAutomation::Reflect(context);
         if (AZ::SerializeContext* serialize = azrtti_cast<AZ::SerializeContext*>(context))
         {
             ScriptCanvasEditor::Settings::Reflect(serialize);
@@ -130,6 +133,13 @@ namespace ScriptCanvasEditor
 
     void SystemComponent::Activate()
     {
+        AZ::ApplicationTypeQuery application;
+        AZ::ComponentApplicationBus::Broadcast(&AZ::ComponentApplicationRequests::QueryApplicationType, application);
+        if (application.IsEditor() && !application.IsAssetProcessor())
+        {
+            m_graphAutomation = AZStd::make_unique<GraphAutomation>();
+            m_graphAutomation->Activate();
+        }
         AZ::JobManagerDesc jobDesc;
         for (size_t i = 0; i < cs_jobThreads; ++i)
         {
@@ -186,6 +196,11 @@ namespace ScriptCanvasEditor
 
     void SystemComponent::Deactivate()
     {
+        if (m_graphAutomation)
+        {
+            m_graphAutomation->Deactivate();
+            m_graphAutomation.reset();
+        }
         AzToolsFramework::ActionManagerRegistrationNotificationBus::Handler::BusDisconnect();
         m_nodeReplacementSystem.UnloadReplacementMetadata();
         AzToolsFramework::AssetBrowser::AssetBrowserInteractionNotificationBus::Handler::BusDisconnect();

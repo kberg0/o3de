@@ -13,6 +13,7 @@
 #include <AzCore/std/optional.h>
 
 #include <EditorPythonBindings/PythonCommon.h>
+#include <EditorPythonBindings/PythonUtility.h>
 #include <pybind11/pybind11.h>
 
 namespace EditorPythonBindings
@@ -54,6 +55,9 @@ namespace EditorPythonBindings
 
         //! Constructs a BehaviorClass using Python arguments 
         pybind11::object Construct(const AZ::BehaviorClass& behaviorClass, pybind11::args args);
+        //! Exact constructor used by structured automation and the existing Python constructor dispatch.
+        Call::StructuredResult ConstructSelected(const AZ::BehaviorClass& behaviorClass, AZ::BehaviorMethod* constructor, pybind11::args args);
+
 
         //! Performs an equality operation to compare this object with another object
         bool DoEqualityEvaluation(pybind11::object pythonOther);
@@ -110,11 +114,7 @@ namespace EditorPythonBindings
         //! Creates the 'azlmbr.object' module so that Python script developers can manage proxy objects
         void CreateSubmodule(pybind11::module parentModule, pybind11::module defaultModule);
 
-        //! Creates a Python object storing a BehaviorObject backed by a BehaviorClass
-        pybind11::object CreatePythonProxyObject(const AZ::TypeId& typeId, void* data);
 
-        //! Checks if function can be reflected as a class member method
-        bool IsMemberLike(const AZ::BehaviorMethod& method, const AZ::TypeId& typeId);
     }
 }
 

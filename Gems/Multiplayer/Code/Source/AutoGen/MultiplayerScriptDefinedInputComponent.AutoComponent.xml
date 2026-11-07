@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Component Name="MultiplayerScriptDefinedInputComponent" Namespace="Multiplayer"
+    OverrideComponent="true" OverrideController="true" Version="2" AddComponentMenu="Internal"
+    OverrideInclude="Multiplayer/Components/MultiplayerScriptDefinedInputComponent.h">
+    <Include File="Multiplayer/MultiplayerScriptDefinedTypes.h" />
+    <NetworkInput Type="Multiplayer::ScriptDefinedInputFrame" Name="Frame" Init="" ExposeToScript="false" />
+</Component>

@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<Component Name="MultiplayerScriptDefinedComponent" Namespace="Multiplayer"
+    OverrideComponent="true" OverrideController="true" GenerateInitializationHelpers="true" Version="2" AddComponentMenu="Internal"
+    OverrideInclude="Multiplayer/Components/MultiplayerScriptDefinedComponent.h">
+    <Include File="Multiplayer/MultiplayerScriptDefinedTypes.h" />
+    <NetworkProperty Type="float" Name="Values" Init="0.0f" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="bool" Name="BoolValues" Init="false" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="int8_t" Name="Int8Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="uint8_t" Name="UInt8Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="int16_t" Name="Int16Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="uint16_t" Name="UInt16Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="int32_t" Name="Int32Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="uint32_t" Name="UInt32Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="int64_t" Name="Int64Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="uint64_t" Name="UInt64Values" Init="0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="AZ::Vector3" Name="Vector3Values" Init="AZ::Vector3::CreateZero()" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="double" Name="DoubleValues" Init="0.0" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="AZ::Vector2" Name="Vector2Values" Init="AZ::Vector2::CreateZero()" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="AZ::Quaternion" Name="QuaternionValues" Init="AZ::Quaternion::CreateIdentity()" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="ScriptDefinedString" Name="StringValues" Init="ScriptDefinedString{}" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <NetworkProperty Type="NetEntityId" Name="EntityValues" Init="InvalidNetEntityId" Container="Vector" Count="16"
+        ReplicateFrom="Authority" ReplicateTo="Client" IsRewindable="false" IsPredictable="true"
+        IsPublic="true" ExposeToEditor="false" ExposeToScript="false" GenerateEventBindings="false" />
+    <RemoteProcedure Name="Dispatch" InvokeFrom="Authority" HandleOn="Client"
+        IsPublic="true" IsReliable="true" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchAuthorityToClientUnreliable" InvokeFrom="Authority" HandleOn="Client" IsPublic="true" IsReliable="false" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchAutonomousToAuthority" InvokeFrom="Autonomous" HandleOn="Authority" IsPublic="true" IsReliable="true" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchAutonomousToAuthorityUnreliable" InvokeFrom="Autonomous" HandleOn="Authority" IsPublic="true" IsReliable="false" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchAuthorityToAutonomous" InvokeFrom="Authority" HandleOn="Autonomous" IsPublic="true" IsReliable="true" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchAuthorityToAutonomousUnreliable" InvokeFrom="Authority" HandleOn="Autonomous" IsPublic="true" IsReliable="false" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchServerToAuthority" InvokeFrom="Server" HandleOn="Authority" IsPublic="true" IsReliable="true" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+    <RemoteProcedure Name="DispatchServerToAuthorityUnreliable" InvokeFrom="Server" HandleOn="Authority" IsPublic="true" IsReliable="false" GenerateEventBindings="false">
+        <Param Type="Multiplayer::ScriptDefinedRpcPayload" Name="Payload" />
+    </RemoteProcedure>
+</Component>

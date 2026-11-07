@@ -42,6 +42,7 @@ namespace AzToolsFramework
             // Note, this function destroys and re-creates Entity* and Component*, do not assume your pointers are still good after this.
             bool UpdateTemplateInstancesInQueue() override;
             bool IsUpdatingTemplateInstancesInQueue() const override;
+            bool HasQueuedTemplateInstances() const override { return !m_instancesUpdateQueue.empty(); }
 
             void RemoveTemplateInstanceFromQueue(Instance* instance) override;
             void QueueRootPrefabLoadedNotificationForNextPropagation() override;

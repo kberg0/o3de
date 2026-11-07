@@ -7,6 +7,7 @@
  */
 
 #include "ScriptCanvasMultiplayerSystemComponent.h"
+#include "MultiplayerScriptDefinedBridge.h"
 #include <AzCore/Memory/SystemAllocator.h>
 #include <AzCore/Module/Module.h>
 
@@ -25,6 +26,7 @@ namespace ScriptCanvasMultiplayer
             // Push results of [MyComponent]::CreateDescriptor() into m_descriptors here.
             m_descriptors.insert(m_descriptors.end(), {
                 ScriptCanvasMultiplayerSystemComponent::CreateDescriptor(),
+                MultiplayerScriptDefinedBridge::CreateDescriptor(),
             });
         }
 

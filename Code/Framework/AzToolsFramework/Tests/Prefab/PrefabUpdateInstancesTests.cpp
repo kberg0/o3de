@@ -51,8 +51,11 @@ namespace UnitTest
 
         // Update Template's Instances.
         m_instanceUpdateExecutorInterface->AddTemplateInstancesToQueue(newTemplateId);
+        EXPECT_FALSE(m_instanceUpdateExecutorInterface->IsUpdatingTemplateInstancesInQueue());
+        EXPECT_TRUE(m_instanceUpdateExecutorInterface->HasQueuedTemplateInstances());
         const bool updateResult = m_instanceUpdateExecutorInterface->UpdateTemplateInstancesInQueue();
         EXPECT_TRUE(updateResult);
+        EXPECT_FALSE(m_instanceUpdateExecutorInterface->HasQueuedTemplateInstances());
 
         // Validate if all entities of each Template's Instance have the updated entity names.
         PrefabTestDomUtils::ValidateInstances(newTemplateId, *entityNameValue, entityNamePath);

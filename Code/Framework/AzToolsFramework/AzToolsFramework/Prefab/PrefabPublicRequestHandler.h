@@ -33,6 +33,12 @@ namespace AzToolsFramework
             void Connect();
             void Disconnect();
 
+            CreatePrefabResult CreateEntity(AZ::EntityId parentId, const AZ::Vector3& position) override;
+            PrefabOperationResult SavePrefab(AZStd::string_view filePath) override;
+            AZ::Outcome<bool, AZStd::string> HasUnsavedChanges(AZStd::string_view filePath) const override;
+            AZ::Outcome<bool, AZStd::string> IsPropagationPending() const override;
+            PrefabPathsResult GetDirtyPrefabPaths() const override;
+
             CreatePrefabResult CreatePrefabInMemory(const EntityIdList& entityIds, AZStd::string_view filePath) override;
             InstantiatePrefabResult InstantiatePrefab(AZStd::string_view filePath, AZ::EntityId parent, const AZ::Vector3& position) override;
             PrefabOperationResult DeleteEntitiesAndAllDescendantsInInstance(const EntityIdList& entityIds) override;

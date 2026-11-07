@@ -8,8 +8,10 @@
 #pragma once
 
 #include <AzCore/Component/ComponentApplication.h>
+#include <stdexcept>
 #include <AzCore/Memory/AllocationRecords.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
+#include <AzCore/Settings/CommandLine.h>
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzFramework/Application/Application.h>
 #include <AzFramework/CommandLine/CommandRegistrationBus.h>
@@ -75,11 +77,8 @@ namespace UnitTest
 
         void SetUp() override
         {
-            // fetch the Engine Root folder
-            if (auto settingsRegistry = AZ::SettingsRegistry::Get(); settingsRegistry != nullptr)
-            {
-                settingsRegistry->Get(m_engineRoot.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_EngineRootFolder);
-            }
+            // Tests can run from a relocated binary snapshot; Python belongs to the configured source engine.
+            m_engineRoot = AZ::IO::FixedMaxPath(EDITOR_PYTHON_BINDINGS_TEST_ENGINE_ROOT).LexicallyNormal();
 
             m_fileIOHelper = AZStd::make_unique<FileIOHelper>();
             m_fileIOHelper->m_fileIO.SetAlias("@engroot@", m_engineRoot.c_str());
@@ -89,6 +88,11 @@ namespace UnitTest
             AZ::ComponentApplication::StartupParameters startupParameters;
             startupParameters.m_loadSettingsRegistry = false;
             m_app.Create(appDesc, startupParameters);
+            AZ::CommandLine sourceEngine;
+            sourceEngine.Parse(AZ::CommandLine::ParamContainer{
+                AZStd::string::format("--engine-path=%s", m_engineRoot.c_str()) });
+            AZ::SettingsRegistryMergeUtils::StoreCommandLineToRegistry(*AZ::SettingsRegistry::Get(), sourceEngine);
+            AZ::SettingsRegistry::Get()->Set(AZ::SettingsRegistryMergeUtils::FilePathKey_EngineRootFolder, m_engineRoot.Native());
 
             AzFramework::ApplicationRequests::Bus::Handler::BusConnect();
         }
@@ -110,9 +114,13 @@ namespace UnitTest
             }
 
             auto editorPythonEventsInterface = AZ::Interface<AzToolsFramework::EditorPythonEventsInterface>::Get();
-            if (editorPythonEventsInterface)
+            if (!editorPythonEventsInterface)
             {
-                editorPythonEventsInterface->StartPython();
+                throw std::runtime_error("Embedded Python service is missing from the test fixture");
+            }
+            if (!editorPythonEventsInterface->IsPythonActive() && !editorPythonEventsInterface->StartPython())
+            {
+                throw std::runtime_error("Embedded Python failed to initialize; inspect its startup diagnostics");
             }
         }
 

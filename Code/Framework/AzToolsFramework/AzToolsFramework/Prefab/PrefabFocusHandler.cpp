@@ -80,7 +80,8 @@ namespace AzToolsFramework::Prefab
                 ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Automation)
                 ->Attribute(AZ::Script::Attributes::Category, "Prefab")
                 ->Attribute(AZ::Script::Attributes::Module, "prefab")
-                ->Event("FocusOnOwningPrefab", &PrefabFocusPublicInterface::FocusOnOwningPrefab);
+                ->Event("FocusOnOwningPrefab", &PrefabFocusPublicInterface::FocusOnOwningPrefab)
+                ->Event("GetFocusedPrefabContainerEntityId", &PrefabFocusPublicInterface::GetFocusedPrefabContainerEntityId);
         }
     }
 

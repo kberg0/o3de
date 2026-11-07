@@ -13,6 +13,11 @@
 
 // Qt
 #include <QTimer>
+#include <QDir>
+#include <QFileInfo>
+#include <AzCore/Outcome/Outcome.h>
+#include <AzCore/IO/Path/Path.h>
+#include <AzToolsFramework/API/EditorAssetSystemAPI.h>
 
 // AzCore
 #include <AzCore/Component/TickBus.h>
@@ -209,6 +214,74 @@ namespace
 
         QString qualifiedName;
         return CCryEditApp::instance()->CreateLevel(templateName, levelName, qualifiedName);
+    }
+
+    AZ::Outcome<AZStd::string, AZStd::string> PyCreateLevelAtPath(
+        const AZStd::string& path, const AZStd::string& templatePath, bool discardUnsaved)
+    {
+        auto* editor = GetIEditor();
+        auto* document = editor->GetDocument();
+        if (editor->IsInGameMode())
+        {
+            return AZ::Failure(AZStd::string("Stop play before creating a level"));
+        }
+        if (document->IsModified() && !discardUnsaved)
+        {
+            return AZ::Failure(AZStd::string("Current level has unsaved changes; save or explicitly discard them"));
+        }
+        if (path.empty() || path.find('\0') != AZStd::string::npos || templatePath.find('\0') != AZStd::string::npos)
+        {
+            return AZ::Failure(AZStd::string("Level/template paths cannot be empty or contain embedded NULs"));
+        }
+        const QDir project(QString::fromUtf8(AZ::Utils::GetProjectPath().c_str()));
+        const QString absolute = QDir::cleanPath(project.absoluteFilePath(QString::fromUtf8(path.c_str())));
+        const auto nativePath = absolute.toUtf8();
+        const QFileInfo file(absolute);
+        const QFileInfo folder(file.absolutePath());
+        // CreateLevel owns the folder/leaf.prefab convention; do not create another level representation.
+        if (!AZ::IO::PathView(nativePath.constData()).IsRelativeTo(AZ::IO::PathView(AZ::Utils::GetProjectPath())) ||
+            file.suffix().compare("prefab", Qt::CaseInsensitive) != 0 || file.completeBaseName() != folder.fileName())
+        {
+            return AZ::Failure(AZStd::string("Level path must be a project folder/name/name.prefab"));
+        }
+        if (folder.exists())
+        {
+            return AZ::Failure(AZStd::string("Level folder already exists; creation never overwrites it"));
+        }
+        if (!templatePath.empty())
+        {
+            bool found = false;
+            AZ::Data::AssetInfo info;
+            AZStd::string watch;
+            AzToolsFramework::AssetSystemRequestBus::BroadcastResult(found,
+                &AzToolsFramework::AssetSystem::AssetSystemRequest::GetSourceInfoBySourcePath, templatePath.c_str(), info, watch);
+            if (!found) { return AZ::Failure(AZStd::string("Level template source was not found by Asset Processor")); }
+        }
+        if (discardUnsaved) { document->SetModifiedFlag(false); }
+        QString created;
+        const auto result = CCryEditApp::instance()->CreateLevel(QString::fromUtf8(templatePath.c_str()),
+            folder.fileName(), created, folder.absolutePath());
+        if (result != CCryEditApp::ECLR_OK || !QFileInfo::exists(created) || !document->IsDocumentReady())
+        {
+            return AZ::Failure(AZStd::string::format("Native level creation failed (code %d); inspect the log and created folder",
+                static_cast<int>(result)));
+        }
+        return AZ::Success(AZStd::string(created.toUtf8().constData()));
+    }
+
+    bool PyIsLevelDocumentReady()
+    {
+        return GetIEditor()->IsLevelLoaded() && GetIEditor()->GetDocument()->IsDocumentReady();
+    }
+
+    bool PyIsLevelDocumentModified()
+    {
+        return GetIEditor()->GetDocument()->IsModified();
+    }
+
+    AZStd::string PyGetLevelDocumentPath()
+    {
+        return AZStd::string(GetIEditor()->GetDocument()->GetLevelPathName().toUtf8().constData());
     }
 
     const char* PyGetCurrentLevelName()
@@ -421,6 +494,11 @@ namespace AzToolsFramework
             addLegacyGeneral(behaviorContext->Method("open_level", ::PyOpenLevel, nullptr, "Opens a level."));
             addLegacyGeneral(behaviorContext->Method("open_level_no_prompt", ::PyOpenLevelNoPrompt, nullptr, "Opens a level. Doesn't prompt user about saving a modified level."));
             addLegacyGeneral(behaviorContext->Method("reload_current_level", ::PyReloadCurrentLevel, nullptr, "Re-loads the current level. If no level is loaded, then does nothing."));
+            addLegacyGeneral(behaviorContext->Method("create_level_at_path", PyCreateLevelAtPath, nullptr,
+                "Create project folder/name/name.prefab through the native new-level path, without dialogs. Disk creation is not undoable."));
+            addLegacyGeneral(behaviorContext->Method("is_level_document_ready", PyIsLevelDocumentReady));
+            addLegacyGeneral(behaviorContext->Method("is_level_document_modified", PyIsLevelDocumentModified));
+            addLegacyGeneral(behaviorContext->Method("get_level_document_path", PyGetLevelDocumentPath));
             addLegacyGeneral(behaviorContext->Method("create_level", ::PyCreateLevel, nullptr, "Creates a level with the parameters of 'templateName', 'levelName', 'resolution', 'unitSize' and 'bUseTerrain'."));
             addLegacyGeneral(behaviorContext->Method("create_level_no_prompt", ::PyCreateLevelNoPrompt, nullptr, "Creates a level with the parameters of 'templateName','levelName', 'resolution', 'unitSize' and 'bUseTerrain'."));
             addLegacyGeneral(behaviorContext->Method("get_game_folder", PyGetGameFolderAsString, nullptr, "Gets the path to the Game folder of current project."));

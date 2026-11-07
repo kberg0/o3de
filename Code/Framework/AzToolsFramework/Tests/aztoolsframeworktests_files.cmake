@@ -148,6 +148,7 @@ set(FILES
     Prefab/PrefabUndoLinkTests.cpp
     Prefab/PrefabUndoTests.cpp
     Prefab/PrefabUpdateInstancesTests.cpp
+    Prefab/PrefabAutomationTests.cpp
     Prefab/PrefabUpdateTemplateTests.cpp
     Prefab/PrefabUpdateWithPatchesTests.cpp
     Prefab/Serialization/PrefabComponentAliasTests.cpp

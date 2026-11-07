@@ -244,6 +244,8 @@ namespace ScriptCanvasEditor
     {
         Q_OBJECT
     private:
+        friend class GraphAutomation;
+        bool m_automationSave = false;
         friend class BatchOperatorTool;
         friend class ScriptCanvasBatchConverter;
         friend class Workspace;

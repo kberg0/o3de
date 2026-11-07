@@ -132,6 +132,7 @@ namespace AzToolsFramework
                     ->Event("CountComponentsOfType", &EditorComponentAPIRequests::CountComponentsOfType)
                     ->Event("GetComponentOfType", &EditorComponentAPIRequests::GetComponentOfType)
                     ->Event("GetComponentsOfType", &EditorComponentAPIRequests::GetComponentsOfType)
+                    ->Event("GetAllComponents", &EditorComponentAPIRequests::GetAllComponents)
                     ->Event("IsValid", &EditorComponentAPIRequests::IsValid)
                     ->Event("EnableComponents", &EditorComponentAPIRequests::EnableComponents)
                     ->Event("IsComponentEnabled", &EditorComponentAPIRequests::IsComponentEnabled)
@@ -415,6 +416,20 @@ namespace AzToolsFramework
             }
         }
 
+        EditorComponentAPIRequests::GetComponentsOutcome EditorComponentAPIComponent::GetAllComponents(AZ::EntityId entityId)
+        {
+            if (!FindEntity(entityId))
+            {
+                return AZ::Failure(AZStd::string("Entity does not exist in the editor context"));
+            }
+            AZStd::vector<AZ::EntityComponentIdPair> result;
+            for (AZ::Component* component : FindComponents(entityId, AZStd::nullopt))
+            {
+                result.emplace_back(entityId, component->GetId());
+            }
+            return AZ::Success(AZStd::move(result));
+        }
+
         EditorComponentAPIRequests::GetComponentsOutcome EditorComponentAPIComponent::GetComponentsOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId)
         {
             AZ::Entity::ComponentArrayType components = FindComponents(entityId, componentTypeId);
@@ -571,7 +586,7 @@ namespace AzToolsFramework
                 return EditorComponentAPIRequests::PropertyTreeOutcome{ AZStd::unexpect, PropertyTreeOutcome::ErrorType("BuildComponentPropertyTreeEditor - Component Instance is Invalid.") };
             }
 
-            return { PropertyTreeOutcome::ValueType(reinterpret_cast<void*>(component), component->GetUnderlyingComponentType()) };
+            return { PropertyTreeOutcome::ValueType(UnwrapInstanceForReflection(component), component->GetUnderlyingComponentType()) };
         }
 
         EditorComponentAPIRequests::PropertyOutcome EditorComponentAPIComponent::GetComponentProperty(const AZ::EntityComponentIdPair& componentInstance, const AZStd::string_view propertyPath)
@@ -767,7 +782,7 @@ namespace AzToolsFramework
             return nullptr;
         }
 
-        AZ::Entity::ComponentArrayType EditorComponentAPIComponent::FindComponents(AZ::EntityId entityId, AZ::Uuid componentTypeId)
+        AZ::Entity::ComponentArrayType EditorComponentAPIComponent::FindComponents(AZ::EntityId entityId, AZStd::optional<AZ::Uuid> componentTypeId)
         {
             AZ::Entity::ComponentArrayType components;
 
@@ -784,7 +799,7 @@ namespace AzToolsFramework
             const auto& entityComponents = entityPtr->GetComponents();
             for (AZ::Component* component : entityComponents)
             {
-                if (component->GetUnderlyingComponentType() == componentTypeId)
+                if (!componentTypeId || component->GetUnderlyingComponentType() == *componentTypeId)
                 {
                     components.push_back(component);
                 }
@@ -795,7 +810,7 @@ namespace AzToolsFramework
             AzToolsFramework::EditorPendingCompositionRequestBus::Event(entityId, &AzToolsFramework::EditorPendingCompositionRequests::GetPendingComponents, pendingComponents);
             for (AZ::Component* component : pendingComponents)
             {
-                if (component->GetUnderlyingComponentType() == componentTypeId)
+                if (!componentTypeId || component->GetUnderlyingComponentType() == *componentTypeId)
                 {
                     components.push_back(component);
                 }
@@ -806,7 +821,7 @@ namespace AzToolsFramework
             AzToolsFramework::EditorDisabledCompositionRequestBus::Event(entityId, &AzToolsFramework::EditorDisabledCompositionRequests::GetDisabledComponents, disabledComponents);
             for (AZ::Component* component : disabledComponents)
             {
-                if (component->GetUnderlyingComponentType() == componentTypeId)
+                if (!componentTypeId || component->GetUnderlyingComponentType() == *componentTypeId)
                 {
                     components.push_back(component);
                 }

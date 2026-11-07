@@ -12,6 +12,7 @@
 #include <AzToolsFramework/Component/EditorComponentAPIBus.h>
 #include <AzToolsFramework/UI/PropertyEditor/PropertyEditorAPI.h>
 #include <AzToolsFramework/AzToolsFrameworkAPI.h>
+#include <AzCore/std/optional.h>
 
 namespace AzToolsFramework
 {
@@ -46,6 +47,7 @@ namespace AzToolsFramework
             size_t CountComponentsOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) override;
             GetComponentOutcome GetComponentOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) override;
             GetComponentsOutcome GetComponentsOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) override;
+            GetComponentsOutcome GetAllComponents(AZ::EntityId entityId) override;
 
             bool IsValid(AZ::EntityComponentIdPair componentInstance) override;
             bool EnableComponents(const AZStd::vector<AZ::EntityComponentIdPair>& componentInstances) override;
@@ -64,7 +66,7 @@ namespace AzToolsFramework
             AZ::Entity* FindEntity(AZ::EntityId entityId);
             AZ::Component* FindComponent(AZ::EntityId entityId, AZ::ComponentId componentId);
             AZ::Component* FindComponent(AZ::EntityId entityId, AZ::Uuid componentType);
-            AZ::Entity::ComponentArrayType FindComponents(AZ::EntityId entityId, AZ::Uuid componentType);
+            AZ::Entity::ComponentArrayType FindComponents(AZ::EntityId entityId, AZStd::optional<AZ::Uuid> componentType);
 
             bool m_usePropertyVisibility = false;
             AZ::SerializeContext* m_serializeContext = nullptr;

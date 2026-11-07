@@ -77,6 +77,45 @@ namespace AZ
             LogInternalV(level, format, file, function, line, args);
             va_end(args);
         }
+
+        //! Records the name of a logging tag so it can be listed. AZLOG registers each tag once per call site.
+        //! @param hashValue the hash value for the provided logging tag
+        //! @param tagName the tag's name
+        virtual void RegisterTag([[maybe_unused]] AZ::HashValue32 hashValue, [[maybe_unused]] const char* tagName) {}
+
+        //! Calls the visitor with every registered tag name and whether that tag is enabled.
+        virtual void VisitTags([[maybe_unused]] const AZStd::function<void(const char* tagName, bool enabled)>& visitor) {}
+
+        //! Returns the tag of the AZLOG message this thread is emitting, or nullptr outside a tagged message.
+        //! Log and trace handlers may read it while they handle the message.
+        virtual const char* GetCurrentTag() const { return nullptr; }
+
+        //! Don't use this directly, use AZLOG
+        virtual void LogTaggedInternalV(
+            [[maybe_unused]] const char* tag, LogLevel level, const char* format, const char* file, const char* function, int32_t line, va_list args)
+        {
+            LogInternalV(level, format, file, function, line, args);
+        }
+
+        //! Don't use this directly, use AZLOG
+        inline void LogTaggedInternal(const char* tag, LogLevel level, const char* format, const char* file, const char* function, int32_t line, ...) AZ_FORMAT_ATTRIBUTE(4, 8)
+        {
+            va_list args;
+            va_start(args, line);
+            LogTaggedInternalV(tag, level, format, file, function, line, args);
+            va_end(args);
+        }
+
+        //! Don't use this directly, use AZLOG. Hashes a tag name and registers it with the current logger.
+        static AZ::HashValue32 RegisterTagName(const char* tagName)
+        {
+            const AZ::HashValue32 hashValue = AZ::TypeHash32(tagName);
+            if (ILogger* logger = AZ::Interface<ILogger>::Get())
+            {
+                logger->RegisterTag(hashValue, tagName);
+            }
+            return hashValue;
+        }
     };
 
     // EBus wrapper for ScriptCanvas
@@ -155,11 +194,11 @@ namespace AZ
 
 #define AZLOG(TAG, MESSAGE, ...)                                                                             \
 {                                                                                                            \
-    static const AZ::HashValue32 hashValue = AZ::TypeHash32(#TAG);                                           \
+    static const AZ::HashValue32 hashValue = AZ::ILogger::RegisterTagName(#TAG);                             \
     AZ::ILogger* logger = AZ::Interface<AZ::ILogger>::Get();                                                 \
     if (logger != nullptr && logger->IsTagEnabled(hashValue))                                                \
     {                                                                                                        \
-        logger->LogInternal(AZ::LogLevel::Notice, MESSAGE, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        logger->LogTaggedInternal(#TAG, AZ::LogLevel::Notice, MESSAGE, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__); \
     }                                                                                                        \
 }
 

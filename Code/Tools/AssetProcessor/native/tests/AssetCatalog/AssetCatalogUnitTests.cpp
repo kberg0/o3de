@@ -1048,6 +1048,28 @@ namespace AssetProcessor
         EXPECT_TRUE(GetSourceInfoBySourcePath(true, m_customDataMembers->m_assetAFullPath.c_str(), m_customDataMembers->m_assetA.m_guid, m_customDataMembers->m_assetASourceRelPath.c_str(), m_customDataMembers->m_subfolder1AbsolutePath.c_str()));
     }
 
+    TEST_F(AssetCatalogTest_AssetInfo, NonzeroProductOfRegisteredSourceTypeDoesNotResolveToSource)
+    {
+        AZ::s64 jobId;
+        ASSERT_TRUE(AddSourceAndJob("subfolder1", m_customDataMembers->m_assetASourceRelPath.c_str(),
+            &m_data->m_dbConn, jobId, m_customDataMembers->m_assetA.m_guid));
+        ProductDatabaseEntry product(jobId, 1, m_customDataMembers->m_assetAProductRelPath.c_str(), m_customDataMembers->m_assetAType);
+        ASSERT_TRUE(m_data->m_dbConn.SetProduct(product));
+        AzToolsFramework::ToolsAssetSystemBus::Broadcast(&AzToolsFramework::ToolsAssetSystemRequests::RegisterSourceAssetType,
+            m_customDataMembers->m_assetAType, m_customDataMembers->m_assetAFileFilter.c_str());
+
+        m_customDataMembers->m_assetA.m_subId = 1;
+        AssetNotificationMessage message(m_customDataMembers->m_assetAProductRelPath.c_str(),
+            AssetNotificationMessage::AssetChanged, m_customDataMembers->m_assetAType, "pc");
+        message.m_sizeBytes = m_customDataMembers->m_productTestString.size();
+        message.m_assetId = m_customDataMembers->m_assetA;
+        m_data->m_assetCatalog->OnAssetMessage(message);
+
+        EXPECT_TRUE(GetAssetInfoByIdPair(true, m_customDataMembers->m_assetAProductRelPath, ""));
+        m_customDataMembers->m_assetA.m_subId = 0;
+        EXPECT_TRUE(GetAssetInfoByIdPair(true, m_customDataMembers->m_assetASourceRelPath, m_customDataMembers->m_subfolder1AbsolutePath));
+    }
+
     TEST_F(AssetCatalogTest_AssetInfo, FindAssetInBuildQueue_FindsSource)
     {
         // Setup:  Add a source to queue.

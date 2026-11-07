@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <AzCore/Outcome/Outcome.h>
 #include <AzCore/RTTI/AttributeReader.h>
 #include <AzCore/RTTI/BehaviorContext.h>
 #include <AzCore/std/optional.h>
@@ -98,7 +99,7 @@ namespace EditorPythonBindings
         //! @param behaviorValue is a parameter that came from a result or some prepared behavior value
         //! @param stackVariableAllocator manages the allocated parameter while in scope
         //! @return a valid Python object or None if no conversion was possible
-        pybind11::object BehaviorValueParameterToPython(AZ::BehaviorArgument& behaviorValue, Convert::StackVariableAllocator& stackVariableAllocator);
+        pybind11::object BehaviorValueParameterToPython(AZ::BehaviorArgument& behaviorValue, Convert::StackVariableAllocator& stackVariableAllocator, AZStd::string* error = nullptr);
 
         //! Converts Python object to a behavior value parameter using an existing behaviorArgument from a Behavior Method
         //! @param behaviorArgument the stored argument slot from a Behavior Method to match with the pyObj to covert in the parameter
@@ -120,8 +121,27 @@ namespace EditorPythonBindings
         AZStd::string GetPythonTypeName(pybind11::object pyObj);
     }
 
+    namespace PythonProxyObjectManagement
+    {
+        //! Creates an owning clone using the same proxy factory as normal Python results. Caller holds the interpreter lock.
+        pybind11::object CreatePythonProxyObject(const AZ::TypeId& typeId, void* data);
+        //! Existing instance/static classification used by Python proxy dispatch.
+        bool IsMemberLike(const AZ::BehaviorMethod& method, const AZ::TypeId& typeId);
+    }
+
     namespace Call
     {
+        using StructuredResult = AZ::Outcome<pybind11::object, AZStd::string>;
+
+        //! Same marshaller as StaticMethod/ClassMethod, with explicit argument/call/result errors.
+        //! A non-None target must be an owned PythonProxyObject. Caller holds the interpreter lock.
+        StructuredResult StructuredMethod(AZ::BehaviorMethod* method, pybind11::object target, pybind11::args args, bool* didInvoke = nullptr);
+        //! Synchronous native borrow, for placement construction before proxy ownership is established.
+        StructuredResult StructuredMethod(AZ::BehaviorMethod* method, AZ::BehaviorObject self, pybind11::args args, bool* didInvoke = nullptr);
+        //! Empty constructor selects the default factory; otherwise uses the exact reflected constructor index.
+        StructuredResult StructuredConstruct(const AZ::BehaviorClass& type, AZStd::optional<size_t> constructor, pybind11::args args);
+
+
         //! Calls a BehaviorMethod with a tuple of arguments for non-member functions
         pybind11::object StaticMethod(AZ::BehaviorMethod* behaviorMethod, pybind11::args args);
 
@@ -131,6 +151,9 @@ namespace EditorPythonBindings
 
     namespace Text
     {
+        //! Shared reflection metadata reader; accepts string and const-char attributes.
+        AZStd::string ReadStringAttribute(const AZ::AttributeArray& attributes, const AZ::Crc32& attribute);
+
         class PythonBehaviorDescription
         {
         public:

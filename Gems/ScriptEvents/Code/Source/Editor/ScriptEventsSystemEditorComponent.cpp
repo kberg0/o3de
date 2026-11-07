@@ -156,6 +156,10 @@ namespace ScriptEventsEditor
 
         const ScriptEvents::ScriptEvent* definition = &assetData->m_definition;
         AZ_Assert(definition, "The AssetData should have a valid definition");
+        if (definition->IsGenerated())
+        {
+            return AZ::Failure(AZStd::string("This interface is generated. Edit its source definition asset instead."));
+        }
 
         return definition->Validate();
     }

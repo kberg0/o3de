@@ -17,6 +17,9 @@ set(FILES
     Include/Multiplayer/MultiplayerMetrics.h
     Include/Multiplayer/MultiplayerStats.h
     Include/Multiplayer/MultiplayerTypes.h
+    Include/Multiplayer/MultiplayerScriptDefinedTypes.h
+    Include/Multiplayer/MultiplayerScriptDefinedDefinition.h
+    Source/MultiplayerScriptDefinedDefinition.cpp
     Include/Multiplayer/MultiplayerEditorServerBus.h
     Include/Multiplayer/Components/SimplePlayerSpawnerComponent.h
     Include/Multiplayer/Components/ISimplePlayerSpawner.h
@@ -76,6 +79,7 @@ set(FILES
     Source/MultiplayerStatSystemComponent.cpp
     Source/MultiplayerStatSystemComponent.h
     Source/MultiplayerStats.cpp
+    Source/MultiplayerScriptDefinedTypes.cpp
     Source/NetworkEntity/NetworkEntityHandle.cpp
     Source/NetworkEntity/NetworkEntityRpcMessage.cpp
     Source/NetworkEntity/NetworkEntityTracker.cpp

@@ -52,6 +52,8 @@ namespace ScriptCanvasEditor
         //=====================================================================
         // EditorComponentBase
         void SetPrimaryAsset(const AZ::Data::AssetId&) override;
+        //! Current source description; product asset identities remain separate.
+        const SourceHandle& GetSource() const { return m_configuration.GetSource(); }
 
     protected:
         static void GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)

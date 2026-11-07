@@ -11,11 +11,13 @@
 #include <AzCore/RTTI/BehaviorContext.h>
 
 #include "ScriptCanvasMultiplayerSystemComponent.h"
+#include "MultiplayerScriptDefinedInterface.h"
 
 namespace ScriptCanvasMultiplayer
 {
     void ScriptCanvasMultiplayerSystemComponent::Reflect(AZ::ReflectContext* context)
     {
+        ReflectScriptDefinedIntegers(context);
         if (AZ::SerializeContext* serialize = azrtti_cast<AZ::SerializeContext*>(context))
         {
             serialize->Class<ScriptCanvasMultiplayerSystemComponent, AZ::Component>()

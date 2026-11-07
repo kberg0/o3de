@@ -791,6 +791,12 @@ namespace AzToolsFramework
 
         AZ_Assert(sourceValuePtr, "Invalid pointer to the source value");
 
+        if (fromType == azrtti_typeid<AZStd::string_view>() && toType == azrtti_typeid<AZStd::string>())
+        {
+            convertedValue = AZStd::string(*static_cast<const AZStd::string_view*>(sourceValuePtr));
+            return AZStd::any_cast<AZStd::string>(&convertedValue);
+        }
+
         if (fromType == AZ::AzTypeInfo<double>::Uuid())
         {
             double value = *static_cast<const double*>(sourceValuePtr);

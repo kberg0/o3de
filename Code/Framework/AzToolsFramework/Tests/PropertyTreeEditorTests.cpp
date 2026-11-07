@@ -8,6 +8,7 @@
 
 #include <AzCore/Asset/AssetSerializer.h>
 #include <AzCore/Serialization/SerializeContext.h>
+#include <AzCore/RTTI/BehaviorContext.h>
 #include <AzFramework/Components/TransformComponent.h>
 #include <AzFramework/Entity/EntityContext.h>
 #include <AzFramework/Asset/SimpleAsset.h>
@@ -213,6 +214,21 @@ namespace UnitTest
         AZ::SerializeContext* m_serializeContext = nullptr;
     };
 
+    TEST_F(PropertyTreeEditorTests, AutomationExposesNativePropertyTypeQuery)
+    {
+        AZ::BehaviorContext* behavior = nullptr;
+        AZ::ComponentApplicationBus::BroadcastResult(behavior, &AZ::ComponentApplicationRequests::GetBehaviorContext);
+        ASSERT_NE(behavior, nullptr);
+        const auto tree = behavior->m_classes.find("PropertyTreeEditor");
+        ASSERT_NE(tree, behavior->m_classes.end());
+        const auto method = tree->second->m_methods.find("GetPropertyType");
+        ASSERT_NE(method, tree->second->m_methods.end());
+        ASSERT_NE(method->second->GetResult(), nullptr);
+        EXPECT_EQ(method->second->GetResult()->m_typeId, azrtti_typeid<AZStd::string>());
+        ASSERT_EQ(method->second->GetNumArguments(), 2);
+        EXPECT_EQ(method->second->GetArgument(1)->m_typeId, azrtti_typeid<AZStd::string_view>());
+    }
+
     TEST_F(PropertyTreeEditorTests, ReadPropertyTreeValues)
     {
         AZ::ComponentApplicationBus::BroadcastResult(m_serializeContext, &AZ::ComponentApplicationRequests::GetSerializeContext);
@@ -328,6 +344,15 @@ namespace UnitTest
             PropertyTreeEditor::PropertyAccessOutcome stringOutcomeGet = propertyTree.GetProperty("My String");
             EXPECT_TRUE(stringOutcomeGet.IsSuccess());
             EXPECT_STREQ(AZStd::any_cast<AZStd::string>(stringOutcomeSet.GetValue()).data(), AZStd::any_cast<AZStd::string>(stringOutcomeGet.GetValue()).data());
+        }
+
+        {
+            AZStd::string source("Borrowed Value");
+            auto written = propertyTree.SetProperty("My String", AZStd::any(AZStd::string_view(source)));
+            ASSERT_TRUE(written.IsSuccess());
+            source.assign("Changed backing storage");
+            EXPECT_EQ(propertyTreeEditorTester.m_myString, "Borrowed Value");
+            EXPECT_TRUE(propertyTree.CompareProperty("My String", AZStd::any(AZStd::string_view("Borrowed Value"))));
         }
 
         {

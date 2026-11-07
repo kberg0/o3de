@@ -873,8 +873,8 @@ namespace AssetProcessor
             isSourceType = m_sourceAssetTypes.find(assetType) != m_sourceAssetTypes.end();
         }
 
-        // If the assetType is registered as a source type, look up the source info
-        if (isSourceType)
+        // Nonzero sub-IDs identify products, including products of a source-editable type.
+        if (isSourceType && assetId.m_subId == 0)
         {
             SourceAssetReference sourceAsset;
 
@@ -1667,7 +1667,7 @@ namespace AssetProcessor
                 // Go through the list of source assets and see if this asset's file path matches any of the filters
                 for (const auto& pair : m_sourceAssetTypeFilters)
                 {
-                    if (AZStd::wildcard_match(pair.first, sourceAsset.AbsolutePath().c_str()))
+                    if (id.m_subId == 0 && AZStd::wildcard_match(pair.first, sourceAsset.AbsolutePath().c_str()))
                     {
                         assetInfo.m_assetId = id;
                         assetInfo.m_assetType = pair.second;

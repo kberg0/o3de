@@ -158,6 +158,12 @@ namespace EditorPythonBindings
                 return AZStd::nullopt;
             }
             AZStd::any* anyValue = static_cast<AZStd::any*>(behaviorValue.GetAsUnsafe<AZStd::any>());
+            if (anyValue->empty())
+            {
+                PythonMarshalTypeRequests::PythonValueResult result;
+                result.first = pybind11::none();
+                return result;
+            }
             const AZ::TypeId anyValueTypId { anyValue->get_type_info().m_id };
 
             // is a registered convertible type?

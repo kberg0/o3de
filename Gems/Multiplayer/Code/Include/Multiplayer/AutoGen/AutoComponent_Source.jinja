@@ -71,7 +71,7 @@ const {{ Property.attrib['Type'] }}& {{ ClassName }}::{{ UpperFirst(Property.att
 uint32_t {{ ClassName }}::{{ UpperFirst(Property.attrib['Name']) }}GetSize() const
 {
 {{ ValidateNetworkPropertyGet(ClassName, Property) }}
-    return {{ Prefix }}m_{{ LowerFirst(Property.attrib['Name']) }}.size();
+    return aznumeric_cast<uint32_t>({{ Prefix }}m_{{ LowerFirst(Property.attrib['Name']) }}.size());
 }
 
 {%          if Property.attrib['GenerateEventBindings']|booleanTrue %}
@@ -158,7 +158,7 @@ void {{ ClassName }}::Set{{ UpperFirst(Property.attrib['Name']) }}(int32_t index
 bool {{ ClassName }}::{{ UpperFirst(Property.attrib['Name']) }}PushBack(const {{ Property.attrib['Type'] }} &value)
 {
 {{ ValidateNetworkPropertySet(ClassName, Property) }}
-    int32_t indexToSet = GetParent().m_{{ LowerFirst(Property.attrib['Name']) }}.size();
+    int32_t indexToSet = aznumeric_cast<int32_t>(GetParent().m_{{ LowerFirst(Property.attrib['Name']) }}.size());
     if (indexToSet < {{ Property.attrib['Count'] }})
     {
         GetParent().m_{{ LowerFirst(Property.attrib['Name']) }}.push_back(value);
@@ -321,7 +321,10 @@ void {{ ClassName }}::{{ UpperFirst(Property.attrib['Name']) }}({{ PrintRpcParam
 {%     else %}
     Multiplayer::ComponentRpcEmptyStruct rpcStruct;
 {%     endif %}
-    rpcMessage.SetRpcParams(rpcStruct);
+    if (!rpcMessage.SetRpcParams(rpcStruct))
+    {
+        return;
+    }
     GetNetBindComponent()->{{ "GetSend" + InvokeFrom + "To" + HandleOn + "RpcEvent" }}().Signal(rpcMessage);
 }
 #endif
@@ -718,7 +721,7 @@ void {{ ClassName }}::NotifyChanges{{ AutoComponentMacros.GetNetPropertiesSetNam
 {%         if Property.attrib['Container'] == 'Vector' %}
     if (replicationRecord.m_{{ LowerFirst(AutoComponentMacros.GetNetPropertiesSetName(ReplicateFrom, ReplicateTo)) }}.GetBit(static_cast<int32_t>({{ AutoComponentMacros.GetNetPropertiesQualifiedPropertyDirtyEnum(Component.attrib['Name'], ReplicateFrom, ReplicateTo, Property, 'Size') }})))
     {
-        m_{{ LowerFirst(Property.attrib['Name']) }}SizeChangedEvent.Signal(m_{{ LowerFirst(Property.attrib['Name']) }}.size());
+        m_{{ LowerFirst(Property.attrib['Name']) }}SizeChangedEvent.Signal(aznumeric_cast<uint32_t>(m_{{ LowerFirst(Property.attrib['Name']) }}.size()));
     }
 {%         endif %}
 {%     else %}
@@ -773,7 +776,7 @@ const {{ Property.attrib['Type'] }}& {{ ClassName }}::{{ UpperFirst(Property.att
 
 uint32_t {{ ClassName }}::{{ UpperFirst(Property.attrib['Name']) }}GetSize() const
 {
-    return {{ Prefix }}m_{{ LowerFirst(Property.attrib['Name']) }}.size();
+    return aznumeric_cast<uint32_t>({{ Prefix }}m_{{ LowerFirst(Property.attrib['Name']) }}.size());
 }
 
 {%     else %}
@@ -1580,7 +1583,7 @@ namespace {{ Component.attrib['Namespace'] }}
                     ->Attribute(AZ::Edit::Attributes::Category, "{{ Component.attrib['Namespace'] }}")
                     ->Attribute(AZ::Edit::Attributes::Icon, "Editor/Icons/Components/{{ ComponentName | replace("Component", "")}}.svg")
                     ->Attribute(AZ::Edit::Attributes::ViewportIcon, "Editor/Icons/Components/Viewport/{{ ComponentName | replace("Component", "")}}.svg")
-                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("Game"))
+                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("{{ Component.attrib.get('AddComponentMenu', 'Game') }}"))
                     {{ DefineNetworkPropertyEditReflection(Component, 'Authority', 'Server', ComponentBaseName)|indent(20) -}}
                     {{ DefineNetworkPropertyEditReflection(Component, 'Authority', 'Client', ComponentBaseName)|indent(20) -}}
                     {{ DefineNetworkPropertyEditReflection(Component, 'Authority', 'Autonomous', ComponentBaseName)|indent(20) -}}
@@ -1593,7 +1596,7 @@ namespace {{ Component.attrib['Namespace'] }}
                     ->Attribute(AZ::Edit::Attributes::Category, "{{ Component.attrib['Namespace'] }}")
                     ->Attribute(AZ::Edit::Attributes::Icon, "Editor/Icons/Components/{{ ComponentName | replace("Component", "")}}.svg")
                     ->Attribute(AZ::Edit::Attributes::ViewportIcon, "Editor/Icons/Components/Viewport/{{ ComponentName | replace("Component", "")}}.svg")
-                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("Game"));
+                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("{{ Component.attrib.get('AddComponentMenu', 'Game') }}"));
 {% endif %}
             }
         }

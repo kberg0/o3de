@@ -13,6 +13,8 @@ set(FILES
     Include/Multiplayer/AutoGen/AutoComponent_Header.jinja
     Include/Multiplayer/AutoGen/AutoComponent_Source.jinja
     Include/Multiplayer/Components/LocalPredictionPlayerInputComponent.h
+    Include/Multiplayer/Components/MultiplayerScriptDefinedComponent.h
+    Include/Multiplayer/Components/MultiplayerScriptDefinedInputComponent.h
     Include/Multiplayer/Components/NetworkHierarchyChildComponent.h
     Include/Multiplayer/Components/NetworkHierarchyRootComponent.h
     Include/Multiplayer/Components/NetworkHierarchyBus.h
@@ -25,6 +27,8 @@ set(FILES
     Include/Multiplayer/NetworkEntity/EntityReplication/EntityReplicator.h
     Include/Multiplayer/NetworkEntity/EntityReplication/EntityReplicator.inl
     Source/AutoGen/LocalPredictionPlayerInputComponent.AutoComponent.xml
+    Source/AutoGen/MultiplayerScriptDefinedComponent.AutoComponent.xml
+    Source/AutoGen/MultiplayerScriptDefinedInputComponent.AutoComponent.xml
     Source/AutoGen/NetworkCharacterComponent.AutoComponent.xml
     Source/AutoGen/NetworkDebugPlayerIdComponent.AutoComponent.xml
     Source/AutoGen/NetworkHitVolumesComponent.AutoComponent.xml
@@ -33,6 +37,8 @@ set(FILES
     Source/AutoGen/NetworkHierarchyChildComponent.AutoComponent.xml
     Source/AutoGen/NetworkHierarchyRootComponent.AutoComponent.xml
     Source/Components/LocalPredictionPlayerInputComponent.cpp
+    Source/Components/MultiplayerScriptDefinedComponent.cpp
+    Source/Components/MultiplayerScriptDefinedInputComponent.cpp
     Source/Components/NetworkHierarchyChildComponent.cpp
     Source/Components/NetworkHierarchyRootComponent.cpp
     Source/Components/NetworkCharacterComponent.cpp

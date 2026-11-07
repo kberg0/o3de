@@ -29,6 +29,8 @@ namespace AzToolsFramework
         using DuplicatePrefabResult = AZ::Outcome<EntityIdList, AZStd::string>;
         using PrefabOperationResult = AZ::Outcome<void, AZStd::string>;
         using CreateSpawnableResult = AZ::Outcome<AZ::Data::AssetId, AZStd::string>;
+        using PrefabPathList = AZStd::vector<AZStd::string>;
+        using PrefabPathsResult = AZ::Outcome<PrefabPathList, AZStd::string>;
 
         /**
         * The primary purpose of this bus is to facilitate writing automated tests for prefabs.
@@ -48,6 +50,13 @@ namespace AzToolsFramework
             //////////////////////////////////////////////////////////////////////////
 
             virtual ~PrefabPublicRequests() = default;
+
+            //! Automation access to the existing prefab-aware entity creation and explicit template save.
+            virtual CreatePrefabResult CreateEntity(AZ::EntityId parentId, const AZ::Vector3& position) = 0;
+            virtual PrefabOperationResult SavePrefab(AZStd::string_view filePath) = 0;
+            virtual AZ::Outcome<bool, AZStd::string> HasUnsavedChanges(AZStd::string_view filePath) const = 0;
+            virtual AZ::Outcome<bool, AZStd::string> IsPropagationPending() const = 0;
+            virtual PrefabPathsResult GetDirtyPrefabPaths() const = 0;
 
             /**
              * Create a prefab out of the entities provided, at the path provided, and keep it in memory.

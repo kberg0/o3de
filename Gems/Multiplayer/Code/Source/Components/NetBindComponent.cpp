@@ -374,7 +374,7 @@ namespace Multiplayer
     void NetBindComponent::SetOwningConnectionId(AzNetworking::ConnectionId connectionId)
     {
         m_owningConnectionId = connectionId;
-        for (MultiplayerComponent* multiplayerComponent : m_multiplayerInputComponentVector)
+        for (MultiplayerComponent* multiplayerComponent : m_multiplayerSerializationComponentVector)
         {
             multiplayerComponent->SetOwningConnectionId(connectionId);
         }
@@ -905,7 +905,10 @@ namespace Multiplayer
             if (multiplayerComponent != nullptr)
             {
                 multiplayerComponent->SetOwningConnectionId(m_owningConnectionId);
-                m_multiplayerInputComponentVector.push_back(multiplayerComponent);
+                if (multiplayerComponent->GetController()->IsInputEnabled())
+                {
+                    m_multiplayerInputComponentVector.push_back(multiplayerComponent);
+                }
             }
         }
         AZStd::stable_sort
