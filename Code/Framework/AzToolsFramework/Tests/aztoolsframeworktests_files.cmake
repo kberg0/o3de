@@ -108,6 +108,7 @@ set(FILES
     Prefab/PrefabAssetPathChangeTestFixture.cpp
     Prefab/PrefabAssetPathChangeTestFixture.h
     Prefab/PrefabAssetPathChangeTests.cpp
+    Prefab/PrefabAutomationTests.cpp
     Prefab/PrefabCreateTests.cpp
     Prefab/PrefabDeleteTests.cpp
     Prefab/PrefabDeleteAsOverrideTests.cpp

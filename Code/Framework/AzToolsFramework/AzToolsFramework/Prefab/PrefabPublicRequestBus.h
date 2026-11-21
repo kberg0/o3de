@@ -29,6 +29,8 @@ namespace AzToolsFramework
         using DuplicatePrefabResult = AZ::Outcome<EntityIdList, AZStd::string>;
         using PrefabOperationResult = AZ::Outcome<void, AZStd::string>;
         using CreateSpawnableResult = AZ::Outcome<AZ::Data::AssetId, AZStd::string>;
+        using PrefabPathList = AZStd::vector<AZStd::string>;
+        using PrefabPathsResult = AZ::Outcome<PrefabPathList, AZStd::string>;
 
         /**
         * The primary purpose of this bus is to facilitate writing automated tests for prefabs.
@@ -48,6 +50,38 @@ namespace AzToolsFramework
             //////////////////////////////////////////////////////////////////////////
 
             virtual ~PrefabPublicRequests() = default;
+
+            /**
+             * Create an entity under the parent entity, at the position provided, in the parent's owning prefab instance.
+             * Return an outcome object with the id of the created entity if creation succeeded;
+             * on failure, it comes with an error message detailing the cause of the error.
+             */
+            virtual CreatePrefabResult CreateEntity(AZ::EntityId parentId, const AZ::Vector3& position) = 0;
+
+            /**
+             * Save the prefab template loaded from the file path provided. The path may be relative or absolute;
+             * an absolute path is written exactly.
+             * Return an outcome object; on failure, it comes with an error message detailing the cause of the error.
+             */
+            virtual PrefabOperationResult SavePrefab(AZStd::string_view filePath) = 0;
+
+            /**
+             * Return whether the prefab template loaded from the file path provided has unsaved changes.
+             * The path may be relative or absolute. On failure, the outcome comes with an error message.
+             */
+            virtual AZ::Outcome<bool, AZStd::string> HasUnsavedChanges(AZStd::string_view filePath) const = 0;
+
+            /**
+             * Return whether prefab template changes are still waiting to be propagated to their instances.
+             * Fails if the instance update executor is unavailable.
+             */
+            virtual AZ::Outcome<bool, AZStd::string> IsPropagationPending() const = 0;
+
+            /**
+             * Return the file paths of the templates under the level's root prefab that have unsaved changes.
+             * The list is empty when no root prefab is assigned. Fails if the prefab services are unavailable.
+             */
+            virtual PrefabPathsResult GetDirtyPrefabPaths() const = 0;
 
             /**
              * Create a prefab out of the entities provided, at the path provided, and keep it in memory.

@@ -11,7 +11,10 @@
 #include <AzCore/Asset/AssetManager.h>
 #include <AzCore/Asset/AssetManagerBus.h>
 #include <AzCore/RTTI/BehaviorContext.h>
+#include <AzCore/Serialization/SerializeContext.h>
 
+#include <AzToolsFramework/Entity/PrefabEditorEntityOwnershipInterface.h>
+#include <AzToolsFramework/Prefab/Instance/InstanceUpdateExecutorInterface.h>
 #include <AzToolsFramework/Prefab/PrefabLoader.h>
 #include <AzToolsFramework/Prefab/PrefabPublicInterface.h>
 #include <AzToolsFramework/Prefab/PrefabSystemComponentInterface.h>
@@ -24,6 +27,12 @@ namespace AzToolsFramework
     {
         void PrefabPublicRequestHandler::Reflect(AZ::ReflectContext* context)
         {
+            if (auto* serialize = azrtti_cast<AZ::SerializeContext*>(context))
+            {
+                // The Python native container marshaller requires its serialization collection metadata.
+                serialize->RegisterGenericType<PrefabPathList>();
+            }
+
             AZ::BehaviorContext* behaviorContext = azrtti_cast<AZ::BehaviorContext*>(context);
             if (behaviorContext)
             {
@@ -31,6 +40,11 @@ namespace AzToolsFramework
                     ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Automation)
                     ->Attribute(AZ::Script::Attributes::Category, "Prefab")
                     ->Attribute(AZ::Script::Attributes::Module, "prefab")
+                    ->Event("CreateEntity", &PrefabPublicRequests::CreateEntity)
+                    ->Event("SavePrefab", &PrefabPublicRequests::SavePrefab)
+                    ->Event("HasUnsavedChanges", &PrefabPublicRequests::HasUnsavedChanges)
+                    ->Event("IsPropagationPending", &PrefabPublicRequests::IsPropagationPending)
+                    ->Event("GetDirtyPrefabPaths", &PrefabPublicRequests::GetDirtyPrefabPaths)
                     ->Event("CreatePrefabInMemory", &PrefabPublicRequests::CreatePrefabInMemory)
                     ->Event("InstantiatePrefab", &PrefabPublicRequests::InstantiatePrefab)
                     ->Event("DeleteEntitiesAndAllDescendantsInInstance", &PrefabPublicRequests::DeleteEntitiesAndAllDescendantsInInstance)
@@ -45,6 +59,56 @@ namespace AzToolsFramework
                     ->Event("RemoveAllInMemorySpawnableAssets", &PrefabPublicRequests::RemoveAllInMemorySpawnableAssets)
                     ;
             }
+        }
+
+        CreatePrefabResult PrefabPublicRequestHandler::CreateEntity(AZ::EntityId parentId, const AZ::Vector3& position)
+        {
+            return m_prefabPublicInterface->CreateEntity(parentId, position);
+        }
+
+        PrefabOperationResult PrefabPublicRequestHandler::SavePrefab(AZStd::string_view filePath)
+        {
+            return m_prefabPublicInterface->SavePrefab(AZ::IO::Path(filePath));
+        }
+
+        AZ::Outcome<bool, AZStd::string> PrefabPublicRequestHandler::HasUnsavedChanges(AZStd::string_view filePath) const
+        {
+            return m_prefabPublicInterface->HasUnsavedChanges(AZ::IO::Path(filePath));
+        }
+
+        AZ::Outcome<bool, AZStd::string> PrefabPublicRequestHandler::IsPropagationPending() const
+        {
+            auto* executor = AZ::Interface<InstanceUpdateExecutorInterface>::Get();
+            if (!executor)
+            {
+                return AZ::Failure(AZStd::string("Prefab instance update executor is unavailable"));
+            }
+
+            // Between batches the executor is idle, but instances may still be queued for the next one.
+            const bool isPending = executor->IsUpdatingTemplateInstancesInQueue() || executor->HasQueuedTemplateInstances();
+            return AZ::Success(isPending);
+        }
+
+        PrefabPathsResult PrefabPublicRequestHandler::GetDirtyPrefabPaths() const
+        {
+            auto* ownership = AZ::Interface<PrefabEditorEntityOwnershipInterface>::Get();
+            auto* prefabSystem = AZ::Interface<PrefabSystemComponentInterface>::Get();
+            if (!ownership || !prefabSystem)
+            {
+                return AZ::Failure(AZStd::string("Prefab ownership/system service is unavailable"));
+            }
+
+            PrefabPathList paths;
+            if (ownership->IsRootPrefabAssigned())
+            {
+                const TemplateId rootTemplateId = ownership->GetRootPrefabTemplateId();
+                for (const AZ::IO::PathView& path : prefabSystem->GetDirtyTemplatePaths(rootTemplateId))
+                {
+                    paths.emplace_back(path.Native());
+                }
+            }
+
+            return AZ::Success(AZStd::move(paths));
         }
 
         void PrefabPublicRequestHandler::Connect()

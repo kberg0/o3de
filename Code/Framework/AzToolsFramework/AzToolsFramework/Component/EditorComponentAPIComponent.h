@@ -9,6 +9,7 @@
 
 #include <AzCore/Component/Component.h>
 #include <AzCore/Component/Entity.h>
+#include <AzCore/std/optional.h>
 #include <AzToolsFramework/Component/EditorComponentAPIBus.h>
 #include <AzToolsFramework/UI/PropertyEditor/PropertyEditorAPI.h>
 #include <AzToolsFramework/AzToolsFrameworkAPI.h>
@@ -46,6 +47,7 @@ namespace AzToolsFramework
             size_t CountComponentsOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) override;
             GetComponentOutcome GetComponentOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) override;
             GetComponentsOutcome GetComponentsOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) override;
+            GetComponentsOutcome GetAllComponents(AZ::EntityId entityId) override;
 
             bool IsValid(AZ::EntityComponentIdPair componentInstance) override;
             bool EnableComponents(const AZStd::vector<AZ::EntityComponentIdPair>& componentInstances) override;
@@ -64,7 +66,8 @@ namespace AzToolsFramework
             AZ::Entity* FindEntity(AZ::EntityId entityId);
             AZ::Component* FindComponent(AZ::EntityId entityId, AZ::ComponentId componentId);
             AZ::Component* FindComponent(AZ::EntityId entityId, AZ::Uuid componentType);
-            AZ::Entity::ComponentArrayType FindComponents(AZ::EntityId entityId, AZ::Uuid componentType);
+            //! Finds attached, pending and disabled components of the given type, or of every type when componentType is empty.
+            AZ::Entity::ComponentArrayType FindComponents(AZ::EntityId entityId, AZStd::optional<AZ::Uuid> componentType);
 
             bool m_usePropertyVisibility = false;
             AZ::SerializeContext* m_serializeContext = nullptr;

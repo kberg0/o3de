@@ -75,6 +75,10 @@ namespace AzToolsFramework
         // Returns vector of ComponentIds, or an empty vector if components could not be found.
         virtual GetComponentsOutcome GetComponentsOfType(AZ::EntityId entityId, AZ::Uuid componentTypeId) = 0;
 
+        //! Returns all component instances on the entity, including pending and disabled ones,
+        //! or a failure if the entity can't be found in the editor context.
+        virtual GetComponentsOutcome GetAllComponents(AZ::EntityId entityId) = 0;
+
         //! Verify if component instance referenced by AZ::EntityComponentIdPair is valid.
         virtual bool IsValid(AZ::EntityComponentIdPair componentInstance) = 0;
 

@@ -34,6 +34,8 @@ namespace AzToolsFramework
                         ->Attribute(AZ::Script::Attributes::Alias, "build_paths_list")
                     ->Method("BuildPathsListWithTypes", &PropertyTreeEditor::BuildPathsListWithTypes, nullptr, "Get a complete list of all property paths in the tree with (typename)s.")
                         ->Attribute(AZ::Script::Attributes::Alias, "build_paths_list_with_types")
+                    ->Method("GetPropertyType", &PropertyTreeEditor::GetPropertyType, nullptr, "Gets the native type name for a property path.")
+                        ->Attribute(AZ::Script::Attributes::Alias, "get_property_type")
 
                     // Attribute & visibility API
                     ->Method("SetVisibleEnforcement", &PropertyTreeEditor::SetVisibleEnforcement, nullptr, "Limits the properties using the visibility flags such as ShowChildrenOnly.") 
