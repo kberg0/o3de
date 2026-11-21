@@ -7,6 +7,10 @@
 #
 
 set(FILES
+    Source/MultiplayerScriptDefinedInterface.h
+    Source/MultiplayerScriptDefinedInterface.cpp
+    Source/MultiplayerScriptDefinedBridge.h
+    Source/MultiplayerScriptDefinedBridge.cpp
     Source/ScriptCanvasMultiplayerSystemComponent.cpp
     Source/ScriptCanvasMultiplayerSystemComponent.h
 

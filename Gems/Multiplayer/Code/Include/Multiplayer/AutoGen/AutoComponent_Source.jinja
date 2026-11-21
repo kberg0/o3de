@@ -321,7 +321,10 @@ void {{ ClassName }}::{{ UpperFirst(Property.attrib['Name']) }}({{ PrintRpcParam
 {%     else %}
     Multiplayer::ComponentRpcEmptyStruct rpcStruct;
 {%     endif %}
-    rpcMessage.SetRpcParams(rpcStruct);
+    if (!rpcMessage.SetRpcParams(rpcStruct))
+    {
+        return;
+    }
     GetNetBindComponent()->{{ "GetSend" + InvokeFrom + "To" + HandleOn + "RpcEvent" }}().Signal(rpcMessage);
 }
 #endif
@@ -1580,7 +1583,7 @@ namespace {{ Component.attrib['Namespace'] }}
                     ->Attribute(AZ::Edit::Attributes::Category, "{{ Component.attrib['Namespace'] }}")
                     ->Attribute(AZ::Edit::Attributes::Icon, "Editor/Icons/Components/{{ ComponentName | replace("Component", "")}}.svg")
                     ->Attribute(AZ::Edit::Attributes::ViewportIcon, "Editor/Icons/Components/Viewport/{{ ComponentName | replace("Component", "")}}.svg")
-                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("Game"))
+                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("{{ Component.attrib.get('AddComponentMenu', 'Game') }}"))
                     {{ DefineNetworkPropertyEditReflection(Component, 'Authority', 'Server', ComponentBaseName)|indent(20) -}}
                     {{ DefineNetworkPropertyEditReflection(Component, 'Authority', 'Client', ComponentBaseName)|indent(20) -}}
                     {{ DefineNetworkPropertyEditReflection(Component, 'Authority', 'Autonomous', ComponentBaseName)|indent(20) -}}
@@ -1593,7 +1596,7 @@ namespace {{ Component.attrib['Namespace'] }}
                     ->Attribute(AZ::Edit::Attributes::Category, "{{ Component.attrib['Namespace'] }}")
                     ->Attribute(AZ::Edit::Attributes::Icon, "Editor/Icons/Components/{{ ComponentName | replace("Component", "")}}.svg")
                     ->Attribute(AZ::Edit::Attributes::ViewportIcon, "Editor/Icons/Components/Viewport/{{ ComponentName | replace("Component", "")}}.svg")
-                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("Game"));
+                    ->Attribute(AZ::Edit::Attributes::AppearsInAddComponentMenu, AZ_CRC_CE("{{ Component.attrib.get('AddComponentMenu', 'Game') }}"));
 {% endif %}
             }
         }

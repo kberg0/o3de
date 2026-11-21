@@ -87,6 +87,13 @@ namespace Multiplayer
         //! Returns the input priority ordering for determining the order of ProcessInput or CreateInput functions.
         virtual InputPriorityOrder GetInputOrder() const = 0;
 
+        //! Returns true if this controller takes part in CreateInput and ProcessInput. Evaluated when input ordering is rebuilt.
+        //! Defaults to true, so existing controllers keep processing input even when they own no input payload.
+        virtual bool IsInputEnabled() const
+        {
+            return true;
+        }
+
         //! Base execution for ProcessInput packet, do not call directly.
         //! @param networkInput input structure to process
         //! @param deltaTime    amount of time to integrate the provided inputs over

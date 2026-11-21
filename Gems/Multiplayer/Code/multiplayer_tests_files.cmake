@@ -13,6 +13,7 @@ set(FILES
     Include/Multiplayer/AutoGen/AutoComponent_Header.jinja
     Include/Multiplayer/AutoGen/AutoComponent_Source.jinja
     Tests/AutoGen/TestMultiplayerComponent.AutoComponent.xml
+    Tests/MultiplayerScriptDefined/MultiplayerScriptDefinedComponentTests.cpp
     Tests/ClientHierarchyTests.cpp
     Tests/ServerHierarchyBenchmarks.cpp
     Tests/CommonHierarchySetup.h

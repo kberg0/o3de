@@ -552,6 +552,52 @@ namespace {{ Component.attrib['Namespace'] }}
 
         static AZStd::unique_ptr<Multiplayer::IMultiplayerComponentInput> AllocateComponentInput();
 
+{% if Component.attrib.get('GenerateInitializationHelpers', 'false')|booleanTrue %}
+{% for Property in Component.iter('NetworkProperty') %}
+{% if Property.attrib['Container'] == 'Vector' and not Property.attrib['IsRewindable']|booleanTrue %}
+        //! Seeds prefab or schema defaults before network attachment. Returns false once attached; later writes go through the controller.
+        bool Initialize{{ UpperFirst(Property.attrib['Name']) }}(const AZStd::fixed_vector<{{ Property.attrib['Type'] }}, {{ Property.attrib['Count'] }}>& values)
+        {
+            if (m_netBindComponent)
+            {
+                return false;
+            }
+            m_{{ LowerFirst(Property.attrib['Name']) }} = values;
+            return true;
+        }
+{% elif Property.attrib['Container'] == 'Array' %}
+        //! Seeds prefab or schema defaults before network attachment. Returns false once attached; later writes go through the controller.
+        //! Rewindable elements record the values at the current host frame, so network time must be available.
+        bool Initialize{{ UpperFirst(Property.attrib['Name']) }}(const AZStd::array<{{ Property.attrib['Type'] }}, {{ Property.attrib['Count'] }}>& values)
+        {
+            if (m_netBindComponent)
+            {
+                return false;
+            }
+            for (size_t index = 0; index < values.size(); ++index)
+            {
+                m_{{ LowerFirst(Property.attrib['Name']) }}[index] = values[index];
+            }
+            return true;
+        }
+{% endif %}
+{% endfor %}
+{% set recordBit = {'value': 0} %}
+{% call(Property) AutoComponentMacros.ParseNetworkProperties(Component, 'Authority', 'Client') %}
+        //! First bit of {{ UpperFirst(Property.attrib['Name']) }} in this component's authority-to-client replication record.
+        static constexpr uint32_t {{ UpperFirst(Property.attrib['Name']) }}FirstRecordBit = {{ recordBit.value }};
+{% if Property.attrib['Container'] == 'Vector' %}
+{%     if recordBit.update({'value': recordBit.value + (Property.attrib['Count']|int) + 1}) %}{% endif %}
+{% elif Property.attrib['Container'] == 'Array' %}
+{%     if recordBit.update({'value': recordBit.value + (Property.attrib['Count']|int)}) %}{% endif %}
+{% else %}
+{%     if recordBit.update({'value': recordBit.value + 1}) %}{% endif %}
+{% endif %}
+{% endcall %}
+        //! Number of bits in this component's authority-to-client replication record.
+        static constexpr uint32_t AuthorityToClientRecordBitCount = {{ recordBit.value }};
+{% endif %}
+
         {{ ComponentBaseName }}();
         ~{{ ComponentBaseName }}() override;
 
