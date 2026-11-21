@@ -64,6 +64,7 @@ set(FILES
     Tests/Integration/CanDeleteJackEntity.cpp
     Tests/Bugs/CanDeleteMotionWhenMotionIsBeingBlended.cpp
     Tests/Bugs/CanUndoParameterDeletionAndRestoreBlendTreeConnections.cpp
+    Tests/Editor/EditorAutomationTests.cpp
     Tests/Editor/FileManagerTests.cpp
     Tests/Editor/ParametersGroupDefaultValues.cpp
     Tests/Editor/MotionSetLoadEscalation.cpp

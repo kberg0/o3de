@@ -26,6 +26,7 @@
 #   include <AzToolsFramework/AssetBrowser/AssetBrowserBus.h>
 #   include <AzToolsFramework/AssetBrowser/Entries/SourceAssetBrowserEntry.h>
 #   include <EMotionStudio/EMStudioSDK/Source/EMStudioManager.h>
+#   include <Integration/Editor/EditorAutomationHandler.h>
 #endif // EMOTIONFXANIMATION_EDITOR
 
 namespace AZ
@@ -149,6 +150,7 @@ namespace EMotionFX
 
 #if defined(EMOTIONFXANIMATION_EDITOR)
             AZStd::unique_ptr<EMStudio::EMStudioManager> m_emstudioManager;
+            EditorAutomationHandler m_editorAutomationHandler;
 #endif // EMOTIONFXANIMATION_EDITOR
         };
     }

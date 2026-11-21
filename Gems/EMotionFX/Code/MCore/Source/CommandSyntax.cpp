@@ -299,6 +299,13 @@ namespace MCore
     // log the syntax
     void CommandSyntax::LogSyntax()
     {
+        // "<command> -help" ends up here, also for commands without parameters, which have no longest name to measure
+        if (m_parameters.empty())
+        {
+            MCore::LogInfo("The command has no parameters.");
+            return;
+        }
+
         // find the longest command name
         size_t offset = AZStd::minmax_element(begin(m_parameters), end(m_parameters), [](const Parameter& left, const Parameter& right)
         {

@@ -22,6 +22,7 @@
 
 #include <LmbrCentral/Animation/AttachmentComponentBus.h>
 
+#include <Integration/AnimationBus.h>
 #include <Integration/Components/ActorComponent.h>
 #include <Integration/Rendering/RenderBackendManager.h>
 
@@ -188,15 +189,29 @@ namespace EMotionFX
             if (behaviorContext)
             {
                 behaviorContext->EBus<ActorComponentRequestBus>("ActorComponentRequestBus")
+                    ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Common)
+                    ->Attribute(AZ::Script::Attributes::Module, ScriptModule)
+                    ->Attribute(AZ::Script::Attributes::ToolTip,
+                        "Queries and controls an entity's actor. Outside game mode the Editor Actor component answers the rendering, "
+                        "ray tracing, instance update and detach requests; joint queries and AttachToEntity need game mode.")
                     ->Event("GetJointIndexByName", &ActorComponentRequestBus::Events::GetJointIndexByName)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the index of the joint with this name (case insensitive).")
                     ->Event("GetJointTransform", &ActorComponentRequestBus::Events::GetJointTransform)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a joint's transform in local, model or world space.")
                     ->Event("AttachToEntity", &ActorComponentRequestBus::Events::AttachToEntity)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Attaches this actor to the actor of another entity.")
                     ->Event("DetachFromEntity", &ActorComponentRequestBus::Events::DetachFromEntity)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Detaches this actor from the actor it is attached to.")
                     ->Event("GetRenderCharacter", &ActorComponentRequestBus::Events::GetRenderCharacter)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns whether the actor's mesh is rendered.")
                     ->Event("SetRenderCharacter", &ActorComponentRequestBus::Events::SetRenderCharacter)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns rendering of the actor's mesh on or off.")
                     ->Event("GetRenderActorVisible", &ActorComponentRequestBus::Events::GetRenderActorVisible)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns whether the rendered actor is visible.")
                     ->Event("SetRayTracingEnabled", &ActorComponentRequestBus::Events::SetRayTracingEnabled)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Includes the actor in ray tracing or excludes it.")
                     ->Event("EnableInstanceUpdate", &ActorComponentRequestBus::Events::EnableInstanceUpdate)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns the actor instance's automatic update on or off.")
                     ->VirtualProperty("RenderCharacter", "GetRenderCharacter", "SetRenderCharacter")
                 ;
 

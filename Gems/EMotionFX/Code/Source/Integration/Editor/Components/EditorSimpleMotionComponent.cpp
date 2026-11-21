@@ -15,6 +15,7 @@
 #include <AzToolsFramework/API/ToolsApplicationAPI.h>
 #include <AzFramework/Translation/TranslationDef.h>
 
+#include <Integration/AnimationBus.h>
 #include <Integration/Assets/ActorAsset.h>
 #include <Integration/Editor/Components/EditorSimpleMotionComponent.h>
 #include <Integration/SimpleMotionComponentBus.h>
@@ -66,11 +67,17 @@ namespace EMotionFX
             if (behaviorContext)
             {
                 behaviorContext->EBus<EditorSimpleMotionComponentRequestBus>("EditorSimpleMotionComponentRequestBus")
+                    ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Automation)
+                    ->Attribute(AZ::Script::Attributes::Module, EditorScriptModule)
+                    ->Attribute(AZ::Script::Attributes::ToolTip, "Editor-only requests to an entity's Editor Simple Motion component.")
                     ->Event("SetPreviewInEditor", &EditorSimpleMotionComponentRequestBus::Events::SetPreviewInEditor)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns playback of the motion in the Editor viewport on or off.")
                     ->Event("GetPreviewInEditor", &EditorSimpleMotionComponentRequestBus::Events::GetPreviewInEditor)
                     ->Attribute("Hidden", AZ::Edit::Attributes::PropertyHidden)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns whether the motion plays in the Editor viewport.")
                     ->VirtualProperty("PreviewInEditor", "GetPreviewInEditor", "SetPreviewInEditor")
                     ->Event("GetAssetDuration", &EditorSimpleMotionComponentRequestBus::Events::GetAssetDuration)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Loads the motion asset with this ID, blocking until it loads, and returns its duration in seconds.")
                     ;
 
                 behaviorContext->Class<EditorSimpleMotionComponent>()

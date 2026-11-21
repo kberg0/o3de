@@ -14,6 +14,7 @@
 #include <AzCore/Script/ScriptContext.h>
 #include <AzFramework/Translation/TranslationDef.h>
 
+#include <Integration/AnimationBus.h>
 #include <Integration/Components/SimpleMotionComponent.h>
 #include <MCore/Source/AttributeString.h>
 #include <EMotionFX/Source/ActorInstance.h>
@@ -110,34 +111,56 @@ namespace EMotionFX
             if (behaviorContext)
             {
                 behaviorContext->EBus<SimpleMotionComponentRequestBus>("SimpleMotionComponentRequestBus")
+                    ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Common)
+                    ->Attribute(AZ::Script::Attributes::Module, ScriptModule)
+                    ->Attribute(AZ::Script::Attributes::ToolTip,
+                        "Controls the single motion that an entity's Simple Motion component plays. "
+                        "Outside game mode the Editor Simple Motion component answers, and only plays the motion when PreviewInEditor is on.")
                     ->Event("LoopMotion", &SimpleMotionComponentRequestBus::Events::LoopMotion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns looping of the motion on or off.")
                     ->Event("GetLoopMotion", &SimpleMotionComponentRequestBus::Events::GetLoopMotion)
                         ->Attribute("Hidden", AZ::Edit::Attributes::PropertyHidden)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns whether the motion loops.")
                     ->VirtualProperty("LoopMotion", "GetLoopMotion", "LoopMotion")
                     ->Event("RetargetMotion", &SimpleMotionComponentRequestBus::Events::RetargetMotion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns retargeting of the motion to the actor on or off.")
                     ->Event("ReverseMotion", &SimpleMotionComponentRequestBus::Events::ReverseMotion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Plays the motion backward or forward.")
                     ->Event("MirrorMotion", &SimpleMotionComponentRequestBus::Events::MirrorMotion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns mirroring of the motion on or off.")
                     ->Event("SetPlaySpeed", &SimpleMotionComponentRequestBus::Events::SetPlaySpeed)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets the playback speed, where 1 is normal speed.")
                     ->Event("GetPlaySpeed", &SimpleMotionComponentRequestBus::Events::GetPlaySpeed)
                         ->Attribute("Hidden", AZ::Edit::Attributes::PropertyHidden)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the playback speed.")
                     ->VirtualProperty("PlaySpeed", "GetPlaySpeed", "SetPlaySpeed")
                     ->Event("PlayTime", &SimpleMotionComponentRequestBus::Events::PlayTime)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Moves the playing motion to this time in seconds.")
                     ->Event("GetPlayTime", &SimpleMotionComponentRequestBus::Events::GetPlayTime)
                         ->Attribute("Hidden", AZ::Edit::Attributes::PropertyHidden)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the current time of the playing motion in seconds.")
                     ->VirtualProperty("PlayTime", "GetPlayTime", "PlayTime")
                     ->Event("Motion", &SimpleMotionComponentRequestBus::Events::Motion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets the motion asset to play.")
                     ->Event("GetMotion", &SimpleMotionComponentRequestBus::Events::GetMotion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the asset ID of the motion.")
                     ->VirtualProperty("Motion", "GetMotion", "Motion")
                     ->Event("BlendInTime", &SimpleMotionComponentRequestBus::Events::BlendInTime)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets the time in seconds to blend the motion in.")
                     ->Event("GetBlendInTime", &SimpleMotionComponentRequestBus::Events::GetBlendInTime)
                         ->Attribute("Hidden", AZ::Edit::Attributes::PropertyHidden)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the time in seconds to blend the motion in.")
                     ->VirtualProperty("BlendInTime", "GetBlendInTime", "BlendInTime")
                     ->Event("BlendOutTime", &SimpleMotionComponentRequestBus::Events::BlendOutTime)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets the time in seconds to blend the motion out.")
                     ->Event("GetBlendOutTime", &SimpleMotionComponentRequestBus::Events::GetBlendOutTime)
                         ->Attribute("Hidden", AZ::Edit::Attributes::PropertyHidden)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the time in seconds to blend the motion out.")
                     ->VirtualProperty("BlendOutTime", "GetBlendOutTime", "BlendOutTime")
                     ->Event("PlayMotion", &SimpleMotionComponentRequestBus::Events::PlayMotion)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Plays the motion from the start.")
                     ->Event("GetDuration", &SimpleMotionComponentRequestBus::Events::GetDuration)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the duration of the playing motion in seconds.")
                     ;
 
                 behaviorContext->Class<SimpleMotionComponent>()->RequestBus("SimpleMotionComponentRequestBus");

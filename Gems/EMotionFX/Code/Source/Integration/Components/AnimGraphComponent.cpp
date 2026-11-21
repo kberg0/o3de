@@ -18,6 +18,7 @@
 #include <EMotionFX/Source/ActorInstance.h>
 #include <EMotionFX/Source/MotionSet.h>
 
+#include <Integration/AnimationBus.h>
 #include <Integration/Components/AnimGraphComponent.h>
 
 namespace EMotionFX
@@ -141,49 +142,91 @@ namespace EMotionFX
                 behaviorContext->Constant("InvalidParameterIndex", BehaviorConstant(InvalidIndex));
 
                 behaviorContext->EBus<AnimGraphComponentRequestBus>("AnimGraphComponentRequestBus")
+                    ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Common)
+                    ->Attribute(AZ::Script::Attributes::Module, ScriptModule)
+                    ->Attribute(AZ::Script::Attributes::ToolTip,
+                        "Reads and writes an entity's anim graph parameters and controls its anim graph. "
+                        "Only the runtime Anim Graph component answers, so in the Editor it responds in game mode.")
                     // General API
                     ->Event("FindParameterIndex", &AnimGraphComponentRequestBus::Events::FindParameterIndex)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the index of the parameter with this name, or InvalidParameterIndex.")
                     ->Event("FindParameterName", &AnimGraphComponentRequestBus::Events::FindParameterName)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns the name of the parameter at this index.")
                     ->Event("SetActiveMotionSet", &AnimGraphComponentRequestBus::Events::SetActiveMotionSet)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Makes the motion set with this name the anim graph's active motion set.")
                     
                     // Setters
                     ->Event("SetParameterFloat", &AnimGraphComponentRequestBus::Events::SetParameterFloat)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a float parameter by index.")
                     ->Event("SetParameterBool", &AnimGraphComponentRequestBus::Events::SetParameterBool)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a bool parameter by index.")
                     ->Event("SetParameterString", &AnimGraphComponentRequestBus::Events::SetParameterString)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a string parameter by index.")
                     ->Event("SetParameterVector2", &AnimGraphComponentRequestBus::Events::SetParameterVector2)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a Vector2 parameter by index.")
                     ->Event("SetParameterVector3", &AnimGraphComponentRequestBus::Events::SetParameterVector3)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a Vector3 parameter by index.")
                     ->Event("SetParameterRotationEuler", &AnimGraphComponentRequestBus::Events::SetParameterRotationEuler)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a rotation parameter by index from Euler angles in degrees.")
                     ->Event("SetParameterRotation", &AnimGraphComponentRequestBus::Events::SetNamedParameterRotation)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a rotation parameter by name, the same as SetNamedParameterRotation.")
                     ->Event("SetNamedParameterFloat", &AnimGraphComponentRequestBus::Events::SetNamedParameterFloat)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a float parameter by name.")
                     ->Event("SetNamedParameterBool", &AnimGraphComponentRequestBus::Events::SetNamedParameterBool)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a bool parameter by name.")
                     ->Event("SetNamedParameterString", &AnimGraphComponentRequestBus::Events::SetNamedParameterString)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a string parameter by name.")
                     ->Event("SetNamedParameterVector2", &AnimGraphComponentRequestBus::Events::SetNamedParameterVector2)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a Vector2 parameter by name.")
                     ->Event("SetNamedParameterVector3", &AnimGraphComponentRequestBus::Events::SetNamedParameterVector3)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a Vector3 parameter by name.")
                     ->Event("SetNamedParameterRotationEuler", &AnimGraphComponentRequestBus::Events::SetNamedParameterRotationEuler)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a rotation parameter by name from Euler angles in degrees.")
                     ->Event("SetNamedParameterRotation", &AnimGraphComponentRequestBus::Events::SetNamedParameterRotation)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sets a rotation parameter by name.")
                     ->Event("SetVisualizeEnabled", &AnimGraphComponentRequestBus::Events::SetVisualizeEnabled)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Turns debug drawing of the anim graph on or off.")
                     // Getters
                     ->Event("GetParameterFloat", &AnimGraphComponentRequestBus::Events::GetParameterFloat)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a float parameter by index.")
                     ->Event("GetParameterBool", &AnimGraphComponentRequestBus::Events::GetParameterBool)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a bool parameter by index.")
                     ->Event("GetParameterString", &AnimGraphComponentRequestBus::Events::GetParameterString)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a string parameter by index.")
                     ->Event("GetParameterVector2", &AnimGraphComponentRequestBus::Events::GetParameterVector2)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a Vector2 parameter by index.")
                     ->Event("GetParameterVector3", &AnimGraphComponentRequestBus::Events::GetParameterVector3)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a Vector3 parameter by index.")
                     ->Event("GetParameterRotationEuler", &AnimGraphComponentRequestBus::Events::GetParameterRotationEuler)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a rotation parameter by index as Euler angles in degrees.")
                     ->Event("GetParameterRotation", &AnimGraphComponentRequestBus::Events::GetNamedParameterRotation)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a rotation parameter by name, the same as GetNamedParameterRotation.")
                     ->Event("GetNamedParameterFloat", &AnimGraphComponentRequestBus::Events::GetNamedParameterFloat)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a float parameter by name.")
                     ->Event("GetNamedParameterBool", &AnimGraphComponentRequestBus::Events::GetNamedParameterBool)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a bool parameter by name.")
                     ->Event("GetNamedParameterString", &AnimGraphComponentRequestBus::Events::GetNamedParameterString)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a string parameter by name.")
                     ->Event("GetNamedParameterVector2", &AnimGraphComponentRequestBus::Events::GetNamedParameterVector2)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a Vector2 parameter by name.")
                     ->Event("GetNamedParameterVector3", &AnimGraphComponentRequestBus::Events::GetNamedParameterVector3)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a Vector3 parameter by name.")
                     ->Event("GetNamedParameterRotationEuler", &AnimGraphComponentRequestBus::Events::GetNamedParameterRotationEuler)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a rotation parameter by name as Euler angles in degrees.")
                     ->Event("GetNamedParameterRotation", &AnimGraphComponentRequestBus::Events::GetNamedParameterRotation)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns a rotation parameter by name.")
                     ->Event("GetVisualizeEnabled", &AnimGraphComponentRequestBus::Events::GetVisualizeEnabled)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Returns whether debug drawing of the anim graph is on.")
                     // Anim Graph Sync
                     ->Event("SyncAnimGraph", &AnimGraphComponentRequestBus::Events::SyncAnimGraph)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Makes this anim graph follow the anim graph of the leader entity.")
                     ->Event("DesyncAnimGraph", &AnimGraphComponentRequestBus::Events::DesyncAnimGraph)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Stops this anim graph following the anim graph of the leader entity.")
 
                     ->Event("StartAnimGraph", &AnimGraphComponentRequestBus::Events::StartAnimGraph)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Starts updating the anim graph.")
                     ->Event("StopAnimGraph", &AnimGraphComponentRequestBus::Events::StopAnimGraph)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Stops updating the anim graph and resets its state.")
                     ;
 
                 behaviorContext->EBus<AnimGraphComponentNotificationBus>("AnimGraphComponentNotificationBus")

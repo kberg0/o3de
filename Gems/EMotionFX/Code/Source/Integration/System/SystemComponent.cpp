@@ -412,18 +412,35 @@ namespace EMotionFX
                     ->Property("isEventStart", BehaviorValueGetter(&MotionEvent::m_isEventStart), nullptr)
                 ;
 
+                // The events are queued from animation update threads and sent on the main thread (see OnTick), so Editor
+                // automation can handle them from Python.
                 behaviorContext->EBus<ActorNotificationBus>("ActorNotificationBus")
+                    ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Common)
+                    ->Attribute(AZ::Script::Attributes::Module, ScriptModule)
+                    ->Attribute(AZ::Script::Attributes::ToolTip, "Motion events and anim graph state changes of an entity's actor.")
                     ->Handler<ActorNotificationBusHandler>()
                     ->Event("OnMotionEvent", &ActorNotificationBus::Events::OnMotionEvent)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when a motion event fires during playback.")
                     ->Event("OnMotionLoop", &ActorNotificationBus::Events::OnMotionLoop)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when a motion loops.")
                     ->Event("OnStateEntering", &ActorNotificationBus::Events::OnStateEntering)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when an anim graph state is about to be entered.")
                     ->Event("OnStateEntered", &ActorNotificationBus::Events::OnStateEntered)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when an anim graph state has been entered.")
                     ->Event("OnStateExiting", &ActorNotificationBus::Events::OnStateExiting)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when an anim graph state is about to be exited.")
                     ->Event("OnStateExited", &ActorNotificationBus::Events::OnStateExited)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when an anim graph state has been exited.")
                     ->Event("OnStateTransitionStart", &ActorNotificationBus::Events::OnStateTransitionStart)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when a transition between two anim graph states starts.")
                     ->Event("OnStateTransitionEnd", &ActorNotificationBus::Events::OnStateTransitionEnd)
+                        ->Attribute(AZ::Script::Attributes::ToolTip, "Sent when a transition between two anim graph states ends.")
                 ;
             }
+
+#if defined(EMOTIONFXANIMATION_EDITOR)
+            EditorAutomationHandler::Reflect(context);
+#endif // EMOTIONFXANIMATION_EDITOR
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -511,6 +528,7 @@ namespace EMotionFX
             AzToolsFramework::EditorAnimationSystemRequestsBus::Handler::BusConnect();
             AzToolsFramework::AssetBrowser::AssetBrowserInteractionNotificationBus::Handler::BusConnect();
             AzToolsFramework::ActionManagerRegistrationNotificationBus::Handler::BusConnect();
+            m_editorAutomationHandler.Activate();
 
             // Register custom property handlers for the reflected property editor.
             m_propertyHandlers = RegisterPropertyTypes();
@@ -521,6 +539,8 @@ namespace EMotionFX
         void SystemComponent::Deactivate()
         {
 #if defined(EMOTIONFXANIMATION_EDITOR)
+            m_editorAutomationHandler.Deactivate();
+
             // Unregister custom property handlers for the reflected property editor.
             UnregisterPropertyTypes(m_propertyHandlers);
             m_propertyHandlers.clear();

@@ -23,6 +23,12 @@ namespace EMotionFX
 
     namespace Integration
     {
+        //! Script module of the EMotion FX buses that both game scripts and Editor automation use (azlmbr.emotionfx in Python).
+        inline constexpr const char* ScriptModule = "emotionfx";
+
+        //! Script module of the EMotion FX buses that only Editor automation uses (azlmbr.emotionfx.editor in Python).
+        inline constexpr const char* EditorScriptModule = "emotionfx.editor";
+
         /**
          * EMotion FX System Request Bus
          * Used for making global requests to the EMotion FX system.

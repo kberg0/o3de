@@ -23,6 +23,9 @@ set(FILES
     Source/Integration/Editor/Components/EditorSimpleMotionComponent.cpp
     Source/Integration/Editor/Components/EditorSimpleLODComponent.h
     Source/Integration/Editor/Components/EditorSimpleLODComponent.cpp
+    Source/Integration/Editor/EditorAutomationHandler.h
+    Source/Integration/Editor/EditorAutomationHandler.cpp
+    Include/Integration/EditorAutomationBus.h
     Source/Editor/ActorEditorBus.h
     Source/Editor/ActorJointBrowseEdit.h
     Source/Editor/ActorJointBrowseEdit.cpp
